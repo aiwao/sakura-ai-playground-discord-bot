@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/signal"
 	"sakura_ai_bot/api"
 	"sakura_ai_bot/bot"
 
@@ -46,4 +47,8 @@ func main() {
 	defer db.Close()	
 
 	bot.Setup(sakuraIDList, db)
+	
+	s := make(chan os.Signal, 1)
+   	signal.Notify(stopBot, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
+   	<-s
 }
