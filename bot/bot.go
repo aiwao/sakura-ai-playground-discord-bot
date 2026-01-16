@@ -1,12 +1,35 @@
 package bot
 
 import (
+	"database/sql"
+	"log"
+	"os"
 	"sakura_ai_bot/api"
 
 	"github.com/bwmarrin/discordgo"
 )
 
-func SetupCommand(s *discordgo.Session) {
+var sakuraIDList []api.SakuraID
+var historyDB *sql.DB
+var s *discordgo.Session
+
+func Setup(idList []api.SakuraID, db *sql.DB) {
+	sakuraIDList = idList
+	historyDB = db
+	
+	s, err := discordgo.New("Bot "+os.Getenv("BOT_TOKEN"))
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	s.AddHandler(func(s *discordgo.Session, r *discordgo.Ready) {
+		log.Printf("Logged in as: %v#%v\n", s.State.User.Username, s.State.User.Discriminator)
+	})
+
+	setupCommand()
+}
+
+func setupCommand() {
 	s.ApplicationCommandCreate(
 		s.State.Application.ID,
 		"",
