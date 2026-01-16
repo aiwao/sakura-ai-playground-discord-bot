@@ -15,7 +15,7 @@ var commandRegistry = map[string]func(s *discordgo.Session, i *discordgo.Interac
 
 func registerCommand(s *discordgo.Session, c *Command) {
 	_, err := s.ApplicationCommandCreate(
-		s.State.Application.ID,
+		s.State.User.ID,
 		"",
 		c.ApplicationCommand,
 	)
