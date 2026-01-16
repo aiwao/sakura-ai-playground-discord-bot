@@ -145,7 +145,7 @@ type ChatPayload struct {
 	Model string `json:"model"`
 }
 
-func (s *SakuraSession) Chat(payload ChatPayload) (ChatPayload, error) {
+func (s *SakuraSession) Chat(payload ChatPayload) (Message, error) {
 	client := &http.Client{
 		Jar: s.Jar,
 	}
@@ -156,15 +156,15 @@ func (s *SakuraSession) Chat(payload ChatPayload) (ChatPayload, error) {
 		Header("X-Csrftoken", s.CSRFToken).
 		DoReadByteClient(client)
 	if err != nil {
-		return ChatPayload{}, err
+		return Message{}, err
 	}
 
 	var resPayload ChatPayload
 	if err := json.Unmarshal(b, &resPayload); err != nil {
-		return ChatPayload{}, err
+		return Message{}, err
 	}
 
-	return resPayload, nil
+	return resPayload.Messages[len(resPayload.Messages)-1], nil
 }
 
 type AIModel int

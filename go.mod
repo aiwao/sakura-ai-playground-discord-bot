@@ -8,6 +8,7 @@ require (
 	github.com/bwmarrin/discordgo v0.29.0
 	github.com/corpix/uarand v0.2.0
 	github.com/lib/pq v1.10.9
+	github.com/mattn/go-sqlite3 v1.14.33
 )
 
 require (
