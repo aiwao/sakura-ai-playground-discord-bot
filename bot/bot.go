@@ -89,27 +89,31 @@ func setupCommand() {
 	
 	s.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		if i.ApplicationCommandData().Name == "ask" {
-			options := i.ApplicationCommandData().Options
-			optionMap := make(map[string]*discordgo.ApplicationCommandInteractionDataOption, len(options))
-			for _, o  := range options {
-				optionMap[o.Name] = o
-			}
-
-			msg := ""
-			if o, ok := optionMap["message"]; ok {
-				msg = o.StringValue()
-			}
-			model := api.GPT_OSS_120b
-			if o, ok := optionMap["model"]; ok {
-				model = api.AIModel(o.IntValue())
-			}
-			if msg == "" {
-				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-					Type: discordgo.InteractionResponseChannelMessageWithSource,
-					Data: &discordgo.InteractionResponseData{Content: "Message is must to be not empty"},
-				})
-				return
-			}
+			askCommand(s, i)	
 		}
 	})		
+}
+
+func askCommand(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	options := i.ApplicationCommandData().Options
+	optionMap := make(map[string]*discordgo.ApplicationCommandInteractionDataOption, len(options))
+	for _, o  := range options {
+		optionMap[o.Name] = o
+	}
+
+	msg := ""
+	if o, ok := optionMap["message"]; ok {
+		msg = o.StringValue()
+	}
+	model := api.GPT_OSS_120b
+	if o, ok := optionMap["model"]; ok {
+		model = api.AIModel(o.IntValue())
+	}
+	if msg == "" {
+		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{Content: "Message is must to be not empty"},
+		})
+		return
+	}	
 }
