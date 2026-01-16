@@ -9,6 +9,7 @@ import (
 	"os/signal"
 	"sakura_ai_bot/api"
 	"sakura_ai_bot/bot"
+	"syscall"
 
 	_ "github.com/lib/pq"
 )
@@ -49,6 +50,6 @@ func main() {
 	bot.Setup(sakuraIDList, db)
 	
 	s := make(chan os.Signal, 1)
-   	signal.Notify(stopBot, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
+   	signal.Notify(s, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
    	<-s
 }
