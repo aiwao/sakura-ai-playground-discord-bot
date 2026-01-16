@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"errors"
 	"net/http"
 	"net/http/cookiejar"
@@ -20,13 +21,14 @@ const loginURL = authURL+"login/"
 const codeURL = loginURL+"code/"
 const v1URL = baseURL+"v1/"
 const userURL = v1URL+"user/"
+const chatURL = baseURL+"chat/"
 
 type SakuraID struct {
-	Email string `json:email`
-	Password string `json:password`
-	CreatedAt time.Time `json:created_at`
-	InstaddrID string `json:instaddr_id`
-	InstaddrPassword string `json:instaddr_password`
+	Email string `json:"email"`
+	Password string `json:"password"`
+	CreatedAt time.Time `json:"created_at"`
+	InstaddrID string `json:"instaddr_id"`
+	InstaddrPassword string `json:"instaddr_password"`
 }
 
 type SakuraSession struct {
@@ -130,6 +132,39 @@ func (id SakuraID) NewSakuraSession() (*SakuraSession, error) {
 		CSRFToken: csrf,
 		Jar: jar,
 	}, nil
+}
+
+type Message struct {
+	ID string `json:"id"`
+	Role string `json:"role"`
+	Content string `json:"content"`
+}
+
+type ChatPayload struct {
+	Messages []Message `json:"messages"`
+	Model string `json:"model"`
+}
+
+func (s *SakuraSession) Chat(payload ChatPayload) (ChatPayload, error) {
+	client := &http.Client{
+		Jar: s.Jar,
+	}
+
+	b, _, err := rik.Post(chatURL).
+		JSON(payload).
+		Header("User-agent", uarand.GetRandom()).
+		Header("X-Csrftoken", s.CSRFToken).
+		DoReadByteClient(client)
+	if err != nil {
+		return ChatPayload{}, err
+	}
+
+	var resPayload ChatPayload
+	if err := json.Unmarshal(b, &resPayload); err != nil {
+		return ChatPayload{}, err
+	}
+
+	return resPayload, nil
 }
 
 type AIModel int
