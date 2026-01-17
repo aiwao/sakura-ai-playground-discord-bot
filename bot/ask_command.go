@@ -41,19 +41,15 @@ func AskCommand() *Command {
 					return
 				}
 
-				id := ""
-				if i.Member != nil {
-					id = i.Member.User.ID
-				} else if i.User != nil {
-					id = i.User.ID
-				}
-				if id == "" {
+				id, err := userID(i)
+				if err != nil {
+					log.Println(err)
 					reply("Internal server error", s, i)
 					return
 				}
 
 				rows, err := historyDB.Query(
-					"SELECT (content, id, role) FROM histories WHERE user_id = $1",
+					"SELECT content, id, role FROM histories WHERE user_id = $1",
 					id,
 				)
 				if err != nil {
@@ -76,7 +72,8 @@ func AskCommand() *Command {
 				minID := 1000000000
 				maxID := 9999999999
 				msgID := rand.IntN(maxID-minID+1)+minID
-				messages = append(messages, api.Message{ID: strconv.Itoa(msgID), Content: msg, Role: "user"})
+				userMSG := api.Message{ID: strconv.Itoa(msgID), Content: msg, Role: "user"}
+				messages = append(messages, userMSG)
 
 				for idx := range min(20, len(sessionListCopy)) {
 					session := sessionListCopy[idx]
@@ -96,8 +93,33 @@ func AskCommand() *Command {
 					for _, spl := range splitContent {
 						reply(spl, s, i)
 					}
-					break
+
+					dbQuery := "INSERT INTO histories(user_id, content, id, role) VALUES ($1, $2, $3, $4)"
+					_, err = historyDB.Exec(
+						dbQuery,
+						id,
+						userMSG.Content,
+						userMSG.ID,
+						userMSG.Role,
+					)
+					if err != nil {
+						log.Println(err)
+						return
+					}
+					_, err = historyDB.Exec(
+						dbQuery,
+						id,
+						c.Content,
+						c.ID,
+						c.Role,
+					)
+					if err != nil {
+						log.Println(err)
+					}
+					return
 				}
+
+				reply("Internal server error", s, i)
 			}()
 		},
 		ApplicationCommand: discordgo.ApplicationCommand{

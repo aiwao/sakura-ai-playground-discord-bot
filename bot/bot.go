@@ -2,6 +2,7 @@ package bot
 
 import (
 	"database/sql"
+	"errors"
 	"log"
 	"os"
 	"sakura_ai_bot/api"
@@ -52,13 +53,22 @@ func Setup(idList []api.SakuraID, db *sql.DB) {
 			mu.Lock()
 			sessionList = append(sessionList, session)
 			mu.Unlock()
-			time.Sleep(30*time.Second)
+			time.Sleep(1*time.Second)
 		}
 	}()
 
 	registerCommand(s, AskCommand())
 	
 	select {}
+}
+
+func userID(i *discordgo.InteractionCreate) (string, error) {
+	if i.Member != nil {
+		return i.Member.User.ID, nil
+	} else if i.User != nil {
+		return i.User.ID, nil
+	}
+	return "", errors.New("failed to get user ID")
 }
 
 func thinking(s *discordgo.Session, i *discordgo.InteractionCreate) {

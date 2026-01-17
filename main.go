@@ -6,10 +6,8 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"os/signal"
 	"sakura_ai_bot/api"
 	"sakura_ai_bot/bot"
-	"syscall"
 
 	_ "github.com/lib/pq"
 )
