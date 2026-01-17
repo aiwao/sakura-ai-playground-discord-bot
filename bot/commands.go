@@ -27,6 +27,7 @@ func registerCommand(s *discordgo.Session, c *Command) {
 }
 
 func handleCommand(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	log.Println("BBBBB")
 	if cmd, ok := commandRegistry[i.ApplicationCommandData().Name]; ok {
 		cmd(s, i)
 	}

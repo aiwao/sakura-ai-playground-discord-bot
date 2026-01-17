@@ -12,67 +12,96 @@ import (
 func AskCommand() *Command {
 	return &Command{
 		Action: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			sessionList := <-sessionChan
-			if sessionList == nil || len(sessionList) == 0 {
-				reply("Application is starting now", s, i)
-				return
-			}
+			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
+			})
+			go func() {
+				mu.Lock()
+				sessionListCopy := append([]*api.SakuraSession(nil), sessionList...)
+				mu.Unlock()
+				if len(sessionListCopy) == 0 {
+					reply("Application is starting now", s, i)
+					return
+				}
 
-			options := i.ApplicationCommandData().Options
-			optionMap := make(map[string]*discordgo.ApplicationCommandInteractionDataOption, len(options))
-			for _, o  := range options {
-				optionMap[o.Name] = o
-			}
+				options := i.ApplicationCommandData().Options
+				optionMap := make(map[string]*discordgo.ApplicationCommandInteractionDataOption, len(options))
+				for _, o  := range options {
+					optionMap[o.Name] = o
+				}
 
-			msg := ""
-			if o, ok := optionMap["message"]; ok {
-				msg = o.StringValue()
-			}
-			model := api.GPT_OSS_120b
-			if o, ok := optionMap["model"]; ok {
-				model = api.AIModel(o.IntValue())
-			}
-			if msg == "" {
-				reply("Message is must to be not empty", s, i)	
-				return
-			}
+				msg := ""
+				if o, ok := optionMap["message"]; ok {
+					msg = o.StringValue()
+				}
+				model := api.GPT_OSS_120b
+				if o, ok := optionMap["model"]; ok {
+					model = api.AIModel(o.IntValue())
+				}
+				if msg == "" {
+					reply("Message is must to be not empty", s, i)	
+					return
+				}
 
-			rows, err := historyDB.Query(
-				"SELECT (content, id, role) FROM histories WHERE user_id = $1",
-				i.Member.User.ID,
-			)
-			if err != nil {
-				log.Println(err)
-				reply("Internal server error", s, i)
-				return
-			}
-			defer rows.Close()
+				id := ""
+				if i.Member != nil {
+					id = i.Member.User.ID
+				} else if i.User != nil {
+					id = i.User.ID
+				}
+				if id == "" {
+					reply("Internal server error", s, i)
+					return
+				}
 
-			messages := []api.Message{}
-			for rows.Next() {
-				var message api.Message
-				if err := rows.Scan(&message.Content, &message.ID, &message.Role); err != nil {
+				rows, err := historyDB.Query(
+					"SELECT (content, id, role) FROM histories WHERE user_id = $1",
+					id,
+				)
+				if err != nil {
 					log.Println(err)
 					reply("Internal server error", s, i)
 					return
 				}
-				messages = append(messages, message)
-			}
-			minID := 1000000000
-			maxID := 9999999999
-			msgID := rand.IntN(maxID-minID+1)+minID
-			messages = append(messages, api.Message{ID: strconv.Itoa(msgID), Content: msg, Role: "user"})
+				defer rows.Close()
 
-			for idx := range min(20, len(sessionList)) {
-				session := sessionList[idx]
-				c, err := session.Chat(api.ChatPayload{Messages: messages, Model: model.Name()})
-				if err != nil {
-					log.Println(err)
-					continue
+				messages := []api.Message{}
+				for rows.Next() {
+					var message api.Message
+					if err := rows.Scan(&message.Content, &message.ID, &message.Role); err != nil {
+						log.Println(err)
+						reply("Internal server error", s, i)
+						return
+					}
+					messages = append(messages, message)
 				}
-				reply(c.Content, s, i)
-				break
-			}	
+				minID := 1000000000
+				maxID := 9999999999
+				msgID := rand.IntN(maxID-minID+1)+minID
+				messages = append(messages, api.Message{ID: strconv.Itoa(msgID), Content: msg, Role: "user"})
+
+				for idx := range min(20, len(sessionListCopy)) {
+					session := sessionListCopy[idx]
+					c, err := session.Chat(api.ChatPayload{Messages: messages, Model: model.Name()})
+					if err != nil {
+						log.Println(err)
+						continue
+					}
+
+					splitSize := 900
+					var splitContent []string
+					runes := []rune(c.Content)
+					for i := 0; i < len(runes); i += splitSize {
+						end := min(i + splitSize, len(runes))
+						splitContent = append(splitContent, string(runes[i:end]))
+					}
+					for _, spl := range splitContent {
+						reply(spl, s, i)
+					}
+					break
+				}
+			}()
+			log.Println("AAAAAAA")
 		},
 		ApplicationCommand: discordgo.ApplicationCommand{
 			Name:        "ask",
