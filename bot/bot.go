@@ -40,6 +40,7 @@ func Setup(idList []api.SakuraID, db *sql.DB) {
 	if err := s.Open(); err != nil {
 		log.Fatalln(err)
 	}
+	defer s.Close()
 
 	go func() {
 		for _, id := range sakuraIDList {
@@ -56,6 +57,8 @@ func Setup(idList []api.SakuraID, db *sql.DB) {
 	}()
 
 	registerCommand(s, AskCommand())
+	
+	select {}
 }
 
 func reply(message string, s *discordgo.Session, i *discordgo.InteractionCreate) {

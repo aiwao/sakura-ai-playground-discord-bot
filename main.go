@@ -48,8 +48,4 @@ func main() {
 	defer db.Close()	
 
 	bot.Setup(sakuraIDList, db)
-	
-	s := make(chan os.Signal, 1)
-   	signal.Notify(s, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
-   	<-s
 }
