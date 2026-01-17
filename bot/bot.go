@@ -58,7 +58,8 @@ func Setup(idList []api.SakuraID, db *sql.DB) {
 	}()
 
 	registerCommand(s, AskCommand())
-	
+	registerCommand(s, ClearHistoryCommand())
+
 	select {}
 }
 
