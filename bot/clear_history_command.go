@@ -11,7 +11,7 @@ func ClearHistoryCommand() *Command {
 		Action: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			thinking(s, i)
 			go func() {
-				id, err := userID(i)
+				id, err := getUserID(i)
 				if err != nil {
 					log.Println(err)
 					reply("Internal server error", s, i)

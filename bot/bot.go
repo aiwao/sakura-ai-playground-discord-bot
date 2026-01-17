@@ -10,8 +10,6 @@ import (
 	"time"
 
 	"github.com/bwmarrin/discordgo"
-
-	_ "github.com/mattn/go-sqlite3"
 )
 
 var sakuraIDList []api.SakuraID
@@ -59,11 +57,12 @@ func Setup(idList []api.SakuraID, db *sql.DB) {
 
 	registerCommand(s, AskCommand())
 	registerCommand(s, ClearHistoryCommand())
+	registerCommand(s, ShowHistoryCommand())
 
 	select {}
 }
 
-func userID(i *discordgo.InteractionCreate) (string, error) {
+func getUserID(i *discordgo.InteractionCreate) (string, error) {
 	if i.Member != nil {
 		return i.Member.User.ID, nil
 	} else if i.User != nil {
@@ -82,4 +81,43 @@ func reply(message string, s *discordgo.Session, i *discordgo.InteractionCreate)
 	s.FollowupMessageCreate(i.Interaction, false, &discordgo.WebhookParams{
 		Content: message,
 	})
+}
+
+func replyEphemeral(message string, s *discordgo.Session, i *discordgo.InteractionCreate) {
+	s.FollowupMessageCreate(i.Interaction, false, &discordgo.WebhookParams{
+		Content: message,
+		Flags: discordgo.MessageFlagsEphemeral,
+	})
+}
+
+type OptionMap map[string]*discordgo.ApplicationCommandInteractionDataOption
+
+func mapOption(i *discordgo.InteractionCreate) OptionMap {
+	options := i.ApplicationCommandData().Options
+	optionMap := make(OptionMap, len(options))
+	for _, o  := range options {
+		optionMap[o.Name] = o
+	}
+	return optionMap
+}
+
+func getOptionString(key string, optionMap OptionMap) (string, error) {
+	if value, ok := optionMap[key]; ok {
+		return value.StringValue(), nil
+	}
+	return "", errors.New("failed to get option")
+}
+
+func getOptionBool(key string, optionMap OptionMap) (bool, error) {
+	if value, ok := optionMap[key]; ok {
+		return value.BoolValue(), nil
+	}
+	return false, errors.New("failed to get option")
+}
+
+func getOptionInt(key string, optionMap OptionMap) (int64, error) {
+	if value, ok := optionMap[key]; ok {
+		return value.IntValue(), nil
+	}
+	return -1, errors.New("failed to get option")
 }

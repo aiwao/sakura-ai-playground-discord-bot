@@ -22,26 +22,21 @@ func AskCommand() *Command {
 					return
 				}
 
-				options := i.ApplicationCommandData().Options
-				optionMap := make(map[string]*discordgo.ApplicationCommandInteractionDataOption, len(options))
-				for _, o  := range options {
-					optionMap[o.Name] = o
-				}
-
-				msg := ""
-				if o, ok := optionMap["message"]; ok {
-					msg = o.StringValue()
-				}
-				model := api.GPT_OSS_120b
-				if o, ok := optionMap["model"]; ok {
-					model = api.AIModel(o.IntValue())
-				}
-				if msg == "" {
-					reply("Message is must to be not empty", s, i)	
+				optionMap := mapOption(i)
+				msg, err := getOptionString("message", optionMap)
+				if err != nil || msg == "" {
+					reply("Message is required", s, i)
 					return
 				}
+			
+				modelInt, err := getOptionInt("model", optionMap)
+				if err != nil || modelInt == -1 {
+					reply("Model is required", s, i)
+					return
+				}
+				model := api.AIModel(modelInt)	
 
-				id, err := userID(i)
+				id, err := getUserID(i)
 				if err != nil {
 					log.Println(err)
 					reply("Internal server error", s, i)
