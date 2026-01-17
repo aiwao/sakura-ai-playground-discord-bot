@@ -8,7 +8,7 @@ import (
 
 type Command struct {
 	Action func(s *discordgo.Session, i *discordgo.InteractionCreate)
-	*discordgo.ApplicationCommand
+	discordgo.ApplicationCommand
 }
 
 var commandRegistry = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){}
@@ -17,7 +17,7 @@ func registerCommand(s *discordgo.Session, c *Command) {
 	_, err := s.ApplicationCommandCreate(
 		s.State.User.ID,
 		"",
-		c.ApplicationCommand,
+		&c.ApplicationCommand,
 	)
 	if err != nil {
 		log.Println(err)

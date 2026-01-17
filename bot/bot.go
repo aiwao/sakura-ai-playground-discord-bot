@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"sakura_ai_bot/api"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
 
@@ -22,11 +23,15 @@ func Setup(idList []api.SakuraID, db *sql.DB) {
 	s, err := discordgo.New("Bot "+os.Getenv("BOT_TOKEN"))
 	if err != nil {
 		log.Fatalln(err)
-	}
+	}	
 
 	s.AddHandler(func(s *discordgo.Session, r *discordgo.Ready) {
 		log.Printf("Logged in as: %v#%v\n", s.State.User.Username, s.State.User.Discriminator)
 	})
+
+	if err := s.Open(); err != nil {
+		log.Fatalln(err)
+	}
 
 	sessionChan = make(chan []*api.SakuraSession)
 	go func() {
@@ -39,6 +44,7 @@ func Setup(idList []api.SakuraID, db *sql.DB) {
 			}
 			sessionList = append(sessionList, session)
 			sessionChan <- sessionList
+			time.Sleep(30*time.Second)
 		}
 	}()
 

@@ -2,7 +2,9 @@ package bot
 
 import (
 	"log"
+	"math/rand/v2"
 	"sakura_ai_bot/api"
+	"strconv"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -36,8 +38,8 @@ func AskCommand() *Command {
 			}
 
 			rows, err := historyDB.Query(
-				"SELECT (content, id, role) FROM accounts WHERE user_id = $1",
-				i.User.ID,
+				"SELECT (content, id, role) FROM histories WHERE user_id = $1",
+				i.Member.User.ID,
 			)
 			if err != nil {
 				log.Println(err)
@@ -56,6 +58,10 @@ func AskCommand() *Command {
 				}
 				messages = append(messages, message)
 			}
+			minID := 1000000000
+			maxID := 9999999999
+			msgID := rand.IntN(maxID-minID+1)+minID
+			messages = append(messages, api.Message{ID: strconv.Itoa(msgID), Content: msg, Role: "user"})
 
 			for idx := range min(20, len(sessionList)) {
 				session := sessionList[idx]
@@ -68,7 +74,7 @@ func AskCommand() *Command {
 				break
 			}	
 		},
-		ApplicationCommand: &discordgo.ApplicationCommand{
+		ApplicationCommand: discordgo.ApplicationCommand{
 			Name:        "ask",
 			Description: "Ask the AI",
 			Options: []*discordgo.ApplicationCommandOption{
