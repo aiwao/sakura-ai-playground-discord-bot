@@ -71,22 +71,28 @@ func getUserID(i *discordgo.InteractionCreate) (string, error) {
 	return "", errors.New("failed to get user ID")
 }
 
-func thinking(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func thinkingFlag(s *discordgo.Session, i *discordgo.InteractionCreate, f int) {
+	data := &discordgo.InteractionResponseData{}
+	if f != -1 {
+		data.Flags = discordgo.MessageFlags(f)
+	}
 	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
+		Data: data,
 	})
+}
+
+func thinking(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	thinkingFlag(s, i, -1)	
+}
+
+func thinkingEphemeral(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	thinkingFlag(s, i, int(discordgo.MessageFlagsEphemeral))
 }
 
 func reply(message string, s *discordgo.Session, i *discordgo.InteractionCreate) {
 	s.FollowupMessageCreate(i.Interaction, false, &discordgo.WebhookParams{
 		Content: message,
-	})
-}
-
-func replyEphemeral(message string, s *discordgo.Session, i *discordgo.InteractionCreate) {
-	s.FollowupMessageCreate(i.Interaction, false, &discordgo.WebhookParams{
-		Content: message,
-		Flags: discordgo.MessageFlagsEphemeral,
 	})
 }
 

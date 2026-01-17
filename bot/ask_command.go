@@ -4,6 +4,7 @@ import (
 	"log"
 	"math/rand/v2"
 	"sakura_ai_bot/api"
+	"sakura_ai_bot/utility"
 	"strconv"
 
 	"github.com/bwmarrin/discordgo"
@@ -77,15 +78,8 @@ func AskCommand() *Command {
 						log.Println(err)
 						continue
 					}
-
-					splitSize := 900
-					var splitContent []string
-					runes := []rune(c.Content)
-					for i := 0; i < len(runes); i += splitSize {
-						end := min(i + splitSize, len(runes))
-						splitContent = append(splitContent, string(runes[i:end]))
-					}
-					for _, spl := range splitContent {
+	
+					for _, spl := range utility.SplitByN(c.Content, 900) {
 						reply(spl, s, i)
 					}
 

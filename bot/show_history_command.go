@@ -2,6 +2,7 @@ package bot
 
 import (
 	"log"
+	"sakura_ai_bot/utility"
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
@@ -10,13 +11,17 @@ import (
 func ShowHistoryCommand() *Command {
 	return &Command{
 		Action: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			thinking(s, i)
-			go func() {
-				ephemeral, err := getOptionBool("ephemeral", mapOption(i))
-				if err != nil {
-					reply("Ephemeral is required", s, i)
-					return
-				}
+			ephemeral, err := getOptionBool("ephemeral", mapOption(i))
+			if err != nil {
+				reply("Ephemeral is required", s, i)
+				return
+			}
+			if ephemeral {
+				thinkingEphemeral(s, i)
+			} else {
+				thinking(s, i)
+			}
+			go func() {	
 				id, err := getUserID(i)
 				if err != nil {
 					log.Println(err)
@@ -60,10 +65,8 @@ func ShowHistoryCommand() *Command {
 					replyMSG = strings.Join(messages, "\n")
 				}
 				
-				if ephemeral {
-					replyEphemeral(replyMSG, s, i)
-				} else {
-					reply(replyMSG, s, i)
+				for _, spl := range utility.SplitByN(replyMSG, 900) {
+					reply(spl, s, i)
 				}	
 			}()	
 		},
