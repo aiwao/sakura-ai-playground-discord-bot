@@ -61,6 +61,12 @@ func Setup(idList []api.SakuraID, db *sql.DB) {
 	select {}
 }
 
+func thinking(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
+	})
+}
+
 func reply(message string, s *discordgo.Session, i *discordgo.InteractionCreate) {
 	s.FollowupMessageCreate(i.Interaction, false, &discordgo.WebhookParams{
 		Content: message,

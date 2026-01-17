@@ -12,9 +12,7 @@ import (
 func AskCommand() *Command {
 	return &Command{
 		Action: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-				Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
-			})
+			thinking(s, i)
 			go func() {
 				mu.Lock()
 				sessionListCopy := append([]*api.SakuraSession(nil), sessionList...)
@@ -101,7 +99,6 @@ func AskCommand() *Command {
 					break
 				}
 			}()
-			log.Println("AAAAAAA")
 		},
 		ApplicationCommand: discordgo.ApplicationCommand{
 			Name:        "ask",
