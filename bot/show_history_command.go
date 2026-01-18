@@ -55,9 +55,9 @@ func ShowHistoryCommand() *Command {
 					contentTrim := history.Content
 					runes := []rune(history.Content)
 					if len(runes) > 10 {
-						contentTrim = string(runes[:10])
+						contentTrim = string(runes[:10])+"..."
 					}
-					messages = append(messages, history.Role+": "+contentTrim+"...")
+					messages = append(messages, history.Role+": "+contentTrim)
 				}
 				
 				replyMSG := "History is empty"

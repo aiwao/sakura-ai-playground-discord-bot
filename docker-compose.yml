@@ -8,6 +8,8 @@ services:
       POSTGRES_DB: botdb
     ports:
       - "5432:5432"
+    networks:
+      - shared-sakura-db
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
@@ -19,6 +21,8 @@ services:
       timeout: 10s
   app:
     build: .
+    networks:
+      - shared-sakura-db
     environment:
       BOT_TOKEN: ${BOT_TOKEN}
       OWNER_ID: ${OWNER_ID}
@@ -35,3 +39,7 @@ services:
 
 volumes:
   postgres_data:
+
+networks:
+  shared-sakura-db:
+    name: shared-sakura-db
