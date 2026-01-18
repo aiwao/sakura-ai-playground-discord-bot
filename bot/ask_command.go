@@ -54,7 +54,7 @@ func AskCommand() *Command {
 				}
 
 				rows, err := botDB.Query(
-					"SELECT content, id, role FROM histories WHERE user_id = $1",
+					"SELECT content, id, role FROM histories WHERE user_id = $1 ORDER BY message_order ASC",
 					id,
 				)
 				if err != nil {

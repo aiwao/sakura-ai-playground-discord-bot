@@ -30,7 +30,7 @@ func ShowHistoryCommand() *Command {
 				}
 
 				rows, err := botDB.Query(
-					"SELECT content, role FROM histories WHERE user_id = $1",
+					"SELECT content, role FROM histories WHERE user_id = $1 ORDER BY message_order ASC",
 					id,
 				)
 				if err != nil {
