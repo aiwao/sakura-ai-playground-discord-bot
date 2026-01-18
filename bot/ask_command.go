@@ -19,7 +19,7 @@ func AskCommand() *Command {
 				sessionListCopy := append([]*api.SakuraSession(nil), sessionList...)
 				mu.Unlock()
 				if len(sessionListCopy) == 0 {
-					reply("Application is starting now", s, i)
+					reply("Application is preparing now", s, i)
 					return
 				}
 
