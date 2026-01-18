@@ -1,11 +1,13 @@
 package bot
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"log"
 	"os"
 	"sakura_ai_bot/api"
+	"sakura_ai_bot/utility"
 	"sync"
 	"time"
 
@@ -18,9 +20,41 @@ var (
 	mu sync.Mutex
 	sessionList = []*api.SakuraSession{}
 )
+var cancelLoadSessions context.CancelFunc
 
 func Setup(db *sql.DB) {
-	botDB = db
+	botDB = db	
+
+	loadSessions()
+
+	s, err := discordgo.New("Bot "+os.Getenv("BOT_TOKEN"))
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	s.AddHandler(func(s *discordgo.Session, r *discordgo.Ready) {
+		log.Printf("Logged in as: %v#%v\n", s.State.User.Username, s.State.User.Discriminator)
+	})
+
+	s.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+		handleCommand(s, i)
+	})
+
+	if err := s.Open(); err != nil {
+		log.Fatalln(err)
+	}
+	defer s.Close()	
+
+	registerCommand(s, AskCommand())
+	registerCommand(s, ClearHistoryCommand())
+	registerCommand(s, ShowHistoryCommand())
+
+	select {}
+}
+
+func loadSessions() {
+	sakuraIDList = []api.SakuraID{}
+	sessionList = []*api.SakuraSession{}
 
 	rows, err := botDB.Query("SELECT * FROM accounts")
 	if err != nil {
@@ -39,43 +73,27 @@ func Setup(db *sql.DB) {
 	}
 	log.Printf("Sakura ID count: %d\n", len(sakuraIDList))
 
-	s, err := discordgo.New("Bot "+os.Getenv("BOT_TOKEN"))
-	if err != nil {
-		log.Fatalln(err)
-	}	
-
-	s.AddHandler(func(s *discordgo.Session, r *discordgo.Ready) {
-		log.Printf("Logged in as: %v#%v\n", s.State.User.Username, s.State.User.Discriminator)
-	})
-
-	s.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-		handleCommand(s, i)
-	})
-
-	if err := s.Open(); err != nil {
-		log.Fatalln(err)
-	}
-	defer s.Close()
-
-	go func() {
+	ctx, cancel := context.WithCancel(context.Background())
+	cancelLoadSessions = cancel
+	go func(ctx context.Context, cancel context.CancelFunc) {
+		defer cancel()
 		for _, id := range sakuraIDList {
-			session, err := id.NewSakuraSession()
-			if err != nil {
-				log.Println(err)
-				continue
+			select {
+			case <-ctx.Done():
+				return
+			default:
+				session, err := id.NewSakuraSession()
+				if err != nil {
+					log.Println(err)
+					continue
+				}
+				mu.Lock()
+				sessionList = append(sessionList, session)
+				mu.Unlock()
+				time.Sleep(time.Duration(utility.LoadSessionDelay) * time.Millisecond)
 			}
-			mu.Lock()
-			sessionList = append(sessionList, session)
-			mu.Unlock()
-			time.Sleep(1*time.Second)
 		}
-	}()
-
-	registerCommand(s, AskCommand())
-	registerCommand(s, ClearHistoryCommand())
-	registerCommand(s, ShowHistoryCommand())
-
-	select {}
+	}(ctx, cancel)
 }
 
 func getUserID(i *discordgo.InteractionCreate) (string, error) {

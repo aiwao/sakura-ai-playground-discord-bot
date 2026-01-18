@@ -21,6 +21,9 @@ services:
     build: .
     environment:
       BOT_TOKEN: ${BOT_TOKEN}
+      OWNER_ID: ${OWNER_ID}
+      LOAD_SESSION_DELAY: ${LOAD_SESSION_DELAY}
+      CHECK_MAIL_DELAY: ${CHECK_MAIL_DELAY}
       DB_HOST: ${DB_HOST}
       DB_PORT: ${DB_PORT}
       DB_USER: ${DB_USER}

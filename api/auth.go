@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/cookiejar"
 	"regexp"
+	"sakura_ai_bot/utility"
 	"strconv"
 	"time"
 
@@ -120,7 +121,7 @@ func (id SakuraID) NewSakuraSession() (*SakuraSession, error) {
 	for range 20 {
 		previews, err := acc.SearchMail(instaddr.SearchOptions{Query: id.Email})
 		if err != nil {
-			time.Sleep(1*time.Second)
+			time.Sleep(time.Duration(utility.CheckMailDelay)*time.Millisecond)
 			continue
 		}
 		
@@ -152,7 +153,7 @@ func (id SakuraID) NewSakuraSession() (*SakuraSession, error) {
 		if verifyCode != "" {
 			break
 		}
-		time.Sleep(1*time.Second)
+		time.Sleep(time.Duration(utility.CheckMailDelay)*time.Millisecond)
 	}
 	if verifyCode == "" {
 		return nil, errors.New("failed to verify")

@@ -1,5 +1,8 @@
 package utility
 
+var LoadSessionDelay = 1000
+var CheckMailDelay = 1000
+
 func SplitByN(s string, n int) []string {
 	var result []string
 	runes := []rune(s)
