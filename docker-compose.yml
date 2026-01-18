@@ -26,7 +26,6 @@ services:
       DB_USER: ${DB_USER}
       DB_PASS: ${DB_PASS}
       DB_NAME: ${DB_NAME}
-      SAKURA_ID_JSON: ${SAKURA_ID_JSON}
     depends_on:
       db:
         condition: service_healthy
