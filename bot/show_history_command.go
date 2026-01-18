@@ -29,7 +29,7 @@ func ShowHistoryCommand() *Command {
 					return
 				}
 
-				rows, err := historyDB.Query(
+				rows, err := botDB.Query(
 					"SELECT content, role FROM histories WHERE user_id = $1",
 					id,
 				)

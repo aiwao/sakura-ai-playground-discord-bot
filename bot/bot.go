@@ -13,7 +13,7 @@ import (
 )
 
 var sakuraIDList []api.SakuraID
-var historyDB *sql.DB
+var botDB *sql.DB
 var (
 	mu sync.Mutex
 	sessionList = []*api.SakuraSession{}
@@ -21,7 +21,7 @@ var (
 
 func Setup(idList []api.SakuraID, db *sql.DB) {
 	sakuraIDList = idList
-	historyDB = db
+	botDB = db
 
 	s, err := discordgo.New("Bot "+os.Getenv("BOT_TOKEN"))
 	if err != nil {

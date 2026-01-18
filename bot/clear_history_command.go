@@ -17,7 +17,7 @@ func ClearHistoryCommand() *Command {
 					reply("Internal server error", s, i)
 					return
 				}
-				_, err = historyDB.Exec("DELETE FROM histories WHERE user_id = $1", id)
+				_, err = botDB.Exec("DELETE FROM histories WHERE user_id = $1", id)
 				if err != nil {
 					log.Println(err)
 					reply("Internal server error", s, i)

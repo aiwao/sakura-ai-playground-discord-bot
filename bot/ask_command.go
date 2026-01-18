@@ -44,7 +44,7 @@ func AskCommand() *Command {
 					return
 				}
 
-				rows, err := historyDB.Query(
+				rows, err := botDB.Query(
 					"SELECT content, id, role FROM histories WHERE user_id = $1",
 					id,
 				)
@@ -84,7 +84,7 @@ func AskCommand() *Command {
 					}
 
 					dbQuery := "INSERT INTO histories(user_id, content, id, role) VALUES ($1, $2, $3, $4)"
-					_, err = historyDB.Exec(
+					_, err = botDB.Exec(
 						dbQuery,
 						id,
 						userMSG.Content,
@@ -95,7 +95,7 @@ func AskCommand() *Command {
 						log.Println(err)
 						return
 					}
-					_, err = historyDB.Exec(
+					_, err = botDB.Exec(
 						dbQuery,
 						id,
 						c.Content,

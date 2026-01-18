@@ -1,18 +1,18 @@
 services:
   db:
     image: postgres:16.11-alpine3.23
-    container_name: chat-history-postgres
+    container_name: sakura-ai-bot-postgres
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: historydb
+      POSTGRES_DB: botdb
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U user -d historydb"]
+      test: ["CMD-SHELL", "pg_isready -U user -d botdb"]
       interval: 10s
       retries: 5
       start_period: 30s
