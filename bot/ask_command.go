@@ -13,7 +13,16 @@ import (
 func AskCommand() *Command {
 	return &Command{
 		Action: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			thinking(s, i)
+			ephemeral, err := getOptionBool("ephemeral", mapOption(i))
+			if err != nil {
+				reply("Ephemeral is required", s, i)
+				return
+			}
+			if ephemeral {
+				thinkingEphemeral(s, i)
+			} else {
+				thinking(s, i)
+			}
 			go func() {
 				mu.Lock()
 				sessionListCopy := append([]*api.SakuraSession(nil), sessionList...)
@@ -160,6 +169,12 @@ func AskCommand() *Command {
 							Value: api.Qwen3_VL_30B_A3B_Instruct,
 						},
 					},
+				},
+				{
+					Name: "ephemeral",
+					Description: "Only for you",
+					Type: discordgo.ApplicationCommandOptionBoolean,
+					Required: true,
 				},
 			},
 		},

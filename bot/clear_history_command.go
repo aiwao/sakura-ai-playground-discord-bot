@@ -9,7 +9,7 @@ import (
 func ClearHistoryCommand() *Command {
 	return &Command{
 		Action: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			thinking(s, i)
+			thinkingEphemeral(s, i)
 			go func() {
 				id, err := getUserID(i)
 				if err != nil {
