@@ -78,11 +78,15 @@ func loadSessions() {
 	cancelLoadSessions = cancel
 	go func(ctx context.Context, cancel context.CancelFunc) {
 		defer cancel()
+		sessionCnt := 0
 		for _, id := range sakuraIDList {
 			select {
 			case <-ctx.Done():
 				return
 			default:
+				if sessionCnt >= utility.MaxSessions {
+					return
+				}
 				session, err := id.NewSakuraSession()
 				if err != nil {
 					log.Println(err)
@@ -92,6 +96,7 @@ func loadSessions() {
 				sessionList = append(sessionList, session)
 				mu.Unlock()
 				time.Sleep(time.Duration(utility.LoadSessionDelay) * time.Millisecond)
+				sessionCnt++
 			}
 		}
 	}(ctx, cancel)

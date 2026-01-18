@@ -4,6 +4,7 @@ import (
 	"log"
 	"math/rand/v2"
 	"sakura_ai_bot/api"
+	"sakura_ai_bot/utility"
 	"strconv"
 
 	"github.com/bwmarrin/discordgo"
@@ -86,8 +87,11 @@ func AskCommand() *Command {
 				userMSG := api.Message{ID: strconv.Itoa(msgID), Content: msg, Role: "user"}
 				messages = append(messages, userMSG)
 
-				for idx := range min(20, len(sessionListCopy)) {
-					session := sessionListCopy[idx]
+				for _, session := range sessionListCopy {
+					if session.InvalidRequestCount >= utility.MaxInvalid {
+						continue
+					}
+
 					c, err := session.Chat(api.ChatPayload{Messages: messages, Model: model})
 					if err != nil {
 						log.Println(err)

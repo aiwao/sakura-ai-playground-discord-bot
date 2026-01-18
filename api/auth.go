@@ -27,6 +27,7 @@ type SakuraID struct {
 type SakuraSession struct {
 	ID SakuraID
 	Jar *cookiejar.Jar
+	InvalidRequestCount int
 }
 
 func (id SakuraID) NewSakuraSession() (*SakuraSession, error) {
@@ -193,5 +194,6 @@ func (id SakuraID) NewSakuraSession() (*SakuraSession, error) {
 	return &SakuraSession{
 		ID: id,
 		Jar: jar,
+		InvalidRequestCount: 0,
 	}, nil
 }

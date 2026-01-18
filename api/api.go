@@ -53,11 +53,13 @@ func (s *SakuraSession) Chat(payload ChatPayload) (Message, error) {
 		Header("User-Agent", uarand.GetRandom()).
 		DoReadByteClient(client)
 	if err != nil {
+		s.InvalidRequestCount++
 		return Message{}, err
 	}
 
 	var resPayload ResponsePayload
 	if err := json.Unmarshal(b, &resPayload); err != nil {
+		s.InvalidRequestCount++
 		return Message{}, err
 	}
 
@@ -65,6 +67,7 @@ func (s *SakuraSession) Chat(payload ChatPayload) (Message, error) {
 		return resPayload.Content[len(resPayload.Content)-1], nil
 	}
 
+	s.InvalidRequestCount++
 	return Message{}, errors.New("No messages was returned")
 }
 

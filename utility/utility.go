@@ -2,6 +2,8 @@ package utility
 
 var LoadSessionDelay = 1000
 var CheckMailDelay = 1000
+var MaxSessions = 100
+var MaxInvalid = 2
 
 func SplitByN(s string, n int) []string {
 	var result []string
