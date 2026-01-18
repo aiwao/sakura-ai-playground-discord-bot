@@ -33,7 +33,8 @@ func ReloadSessionsCommand() *Command {
 			}()
 		},
 		ApplicationCommand: discordgo.ApplicationCommand{
-
+			Name: "reload_sessions",
+			Description: "[Owner only] Reload sessions",
 		},
 	}
 }
