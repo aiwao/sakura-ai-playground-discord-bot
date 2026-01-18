@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -13,25 +12,6 @@ import (
 )
 
 func main() {
-	sakuraIDJSONFile := os.Getenv("SAKURA_ID_JSON")
-	if sakuraIDJSONFile == "" {
-		log.Fatalln("SAKURA_ID_JSON is empty. please define a JSON file path of Sakura-ID list.")
-	}
-	
-	b, err := os.ReadFile(sakuraIDJSONFile)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	sakuraIDList := []api.SakuraID{}
-	if err := json.Unmarshal(b, &sakuraIDList); err != nil {
-		log.Fatalln(err)
-	}
-	idCnt := len(sakuraIDList)
-	if idCnt == 0 {
-		log.Fatalln("Sakura-ID list is empty")
-	}
-	log.Printf("Sakura-ID count: %d\n", idCnt)
-
 	dbHost := os.Getenv("DB_HOST")	
 	dbPort := os.Getenv("DB_PORT")	
 	dbUser := os.Getenv("DB_USER")	
@@ -45,5 +25,5 @@ func main() {
 	}
 	defer db.Close()	
 
-	bot.Setup(sakuraIDList, db)
+	bot.Setup(db)
 }

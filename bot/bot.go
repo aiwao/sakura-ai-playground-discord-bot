@@ -12,16 +12,32 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-var sakuraIDList []api.SakuraID
+var sakuraIDList = []api.SakuraID{}
 var botDB *sql.DB
 var (
 	mu sync.Mutex
 	sessionList = []*api.SakuraSession{}
 )
 
-func Setup(idList []api.SakuraID, db *sql.DB) {
-	sakuraIDList = idList
+func Setup(db *sql.DB) {
 	botDB = db
+
+	rows, err := botDB.Query("SELECT * FROM accounts")
+	if err != nil {
+		log.Fatalln(err)
+		return
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var idScan api.SakuraID
+		if err := rows.Scan(&idScan.Email, &idScan.Password, &idScan.CreatedAt, &idScan.InstaddrID, &idScan.InstaddrPassword); err != nil {
+			log.Println(err)
+			continue
+		}
+		sakuraIDList = append(sakuraIDList, idScan)
+	}
+	log.Printf("Sakura ID count: %d\n", len(sakuraIDList))
 
 	s, err := discordgo.New("Bot "+os.Getenv("BOT_TOKEN"))
 	if err != nil {
