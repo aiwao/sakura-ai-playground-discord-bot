@@ -89,6 +89,7 @@ func AskCommand() *Command {
 
 				for _, session := range sessionListCopy {
 					if session.InvalidRequestCount >= utility.MaxInvalid {
+						chAddSessions <- 1	
 						continue
 					}
 

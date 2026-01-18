@@ -1,3 +1,5 @@
+github.com/aiwao/envar v1.0.0 h1:zlNMdyEcj7/Zyu9fBWRz5SzvwJB8BxN08v+byW1YNz8=
+github.com/aiwao/envar v1.0.0/go.mod h1:pf+rjGtd9+ojHWwHmVp1Ig867DrAAkvuTn0uxhvvZEQ=
 github.com/aiwao/instaddr_api v1.0.6 h1:t0gTX1BJfBje2pqrv6Z62t9C+RBEXk44HbCfbJF5ypg=
 github.com/aiwao/instaddr_api v1.0.6/go.mod h1:2LhsSZsbtX7lb7QSu1bdA9s/vwvUMUP9xhJ/jerZ7WE=
 github.com/aiwao/rik v1.0.9 h1:R74cpR3cjGuJHYwSBQKlIwhYiRYYYeO2K5uK6yarABM=
@@ -19,8 +21,6 @@ github.com/gorilla/websocket v1.4.2 h1:+/TMaTYc4QFitKJxsQ7Yye35DkWvkdLcvGKqM+x0U
 github.com/gorilla/websocket v1.4.2/go.mod h1:YR8l580nyteQvAITg2hZ9XVh4b55+EU/adAjf1fMHhE=
 github.com/lib/pq v1.10.9 h1:YXG7RB+JIjhP29X+OtkiDnYaXQwpS4JEWq7dtCCRUEw=
 github.com/lib/pq v1.10.9/go.mod h1:AlVN5x4E4T544tWzH6hKfbfQvm3HdbOxrmggDNAPY9o=
-github.com/mattn/go-sqlite3 v1.14.33 h1:A5blZ5ulQo2AtayQ9/limgHEkFreKj1Dv226a1K73s0=
-github.com/mattn/go-sqlite3 v1.14.33/go.mod h1:Uh1q+B4BYcTPb+yiD3kU8Ct7aC0hY9fxUwlHK0RXw+Y=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/stretchr/testify v1.7.1 h1:5TQK59W5E3v0r2duFAb7P95B6hEeOyEnHRa8MjYSMTY=

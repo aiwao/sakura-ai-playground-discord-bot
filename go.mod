@@ -8,10 +8,10 @@ require (
 	github.com/bwmarrin/discordgo v0.29.0
 	github.com/corpix/uarand v0.2.0
 	github.com/lib/pq v1.10.9
-	github.com/mattn/go-sqlite3 v1.14.33
 )
 
 require (
+	github.com/aiwao/envar v1.0.0 // indirect
 	github.com/antchfx/htmlquery v1.3.5 // indirect
 	github.com/antchfx/xpath v1.3.5 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect

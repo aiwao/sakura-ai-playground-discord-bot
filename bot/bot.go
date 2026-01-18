@@ -20,7 +20,12 @@ var (
 	mu sync.Mutex
 	sessionList = []*api.SakuraSession{}
 )
-var cancelLoadSessions context.CancelFunc
+var (
+	lastLoadedSessionIDX int
+	chAddSessions chan int
+	cancelLoadSessions context.CancelFunc
+	ctxLoadSessions context.Context
+)
 
 func Setup(db *sql.DB) {
 	botDB = db	
@@ -54,6 +59,7 @@ func Setup(db *sql.DB) {
 }
 
 func loadSessions() {
+	lastLoadedSessionIDX = 0
 	sakuraIDList = []api.SakuraID{}
 	sessionList = []*api.SakuraSession{}
 
@@ -74,20 +80,22 @@ func loadSessions() {
 	}
 	log.Printf("Sakura ID count: %d\n", len(sakuraIDList))
 
-	ctx, cancel := context.WithCancel(context.Background())
-	cancelLoadSessions = cancel
+	ctxLoadSessions, cancelLoadSessions = context.WithCancel(context.Background())
 	go func(ctx context.Context, cancel context.CancelFunc) {
 		defer cancel()
 		sessionCnt := 0
-		for _, id := range sakuraIDList {
+		for idx, id := range sakuraIDList {
 			select {
 			case <-ctx.Done():
 				return
+			case add := <-chAddSessions:
+				sessionCnt-=add
 			default:
 				if sessionCnt >= utility.MaxSessions {
-					return
+					break
 				}
 				session, err := id.NewSakuraSession()
+				lastLoadedSessionIDX = idx
 				if err != nil {
 					log.Println(err)
 					continue
@@ -99,7 +107,30 @@ func loadSessions() {
 				sessionCnt++
 			}
 		}
-	}(ctx, cancel)
+
+		select {
+			case add := <-chAddSessions:
+				if add > 0 {
+					sessionCnt := 0
+					for i := range add {
+						lastLoadedSessionIDX+=i+1
+						id := sakuraIDList[lastLoadedSessionIDX]
+						session, err := id.NewSakuraSession()
+						if err != nil {
+							log.Println(err)
+							continue
+						}
+						mu.Lock()
+						sessionList = append(sessionList, session)
+						mu.Unlock()
+						time.Sleep(time.Duration(utility.LoadSessionDelay) * time.Millisecond)
+						sessionCnt++
+					}
+				}
+			case <-ctx.Done():
+				return
+		}	
+	}(ctxLoadSessions, cancelLoadSessions)
 }
 
 func getUserID(i *discordgo.InteractionCreate) (string, error) {
