@@ -2,7 +2,6 @@ package bot
 
 import (
 	"log"
-	"sakura_ai_bot/utility"
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
@@ -65,9 +64,7 @@ func ShowHistoryCommand() *Command {
 					replyMSG = strings.Join(messages, "\n")
 				}
 				
-				for _, spl := range utility.SplitByN(replyMSG, 900) {
-					reply(spl, s, i)
-				}	
+				replyBigString(replyMSG, s, i)
 			}()	
 		},
 		ApplicationCommand: discordgo.ApplicationCommand{

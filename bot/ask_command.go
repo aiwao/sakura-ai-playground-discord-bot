@@ -4,7 +4,6 @@ import (
 	"log"
 	"math/rand/v2"
 	"sakura_ai_bot/api"
-	"sakura_ai_bot/utility"
 	"strconv"
 
 	"github.com/bwmarrin/discordgo"
@@ -95,9 +94,7 @@ func AskCommand() *Command {
 						continue
 					}
 	
-					for _, spl := range utility.SplitByN(c.Content, 900) {
-						reply(spl, s, i)
-					}
+					replyBigString(c.Content, s, i)
 
 					dbQuery := "INSERT INTO histories(user_id, content, id, role) VALUES ($1, $2, $3, $4)"
 					_, err = botDB.Exec(

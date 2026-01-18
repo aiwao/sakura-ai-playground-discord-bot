@@ -131,6 +131,16 @@ func reply(message string, s *discordgo.Session, i *discordgo.InteractionCreate)
 	})
 }
 
+func replyBigString(message string, s *discordgo.Session, i *discordgo.InteractionCreate) {
+	splitBy900 := utility.SplitByN(message, 900)
+	for idx, spl := range splitBy900 {
+		reply(spl, s, i)
+		if idx != len(splitBy900)-1 {
+			time.Sleep(1*time.Second)
+		}
+	}
+}
+
 type OptionMap map[string]*discordgo.ApplicationCommandInteractionDataOption
 
 func mapOption(i *discordgo.InteractionCreate) OptionMap {
