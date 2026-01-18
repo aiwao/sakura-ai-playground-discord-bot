@@ -48,6 +48,7 @@ func Setup(db *sql.DB) {
 	registerCommand(s, AskCommand())
 	registerCommand(s, ClearHistoryCommand())
 	registerCommand(s, ShowHistoryCommand())
+	registerCommand(s, ReloadSessionsCommand())
 
 	select {}
 }

@@ -24,7 +24,11 @@ func ReloadSessionsCommand() *Command {
 					return
 				}
 
-				
+				if cancelLoadSessions != nil {
+					cancelLoadSessions()
+				}
+				loadSessions()
+
 				reply("Reloaded", s, i)
 			}()
 		},
