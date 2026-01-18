@@ -1,4 +1,5 @@
 CREATE TABLE IF NOT EXISTS histories (
+    message_order BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     user_id TEXT NOT NULL,
     content TEXT NOT NULL,
     id TEXT NOT NULL,
