@@ -23,7 +23,7 @@ func ClearHistoryCommand() *Command {
 					reply("Internal server error", s, i)
 					return
 				}
-				reply("Deleted", s, i)
+				reply("Cleared", s, i)
 			}()
 		},
 		ApplicationCommand: discordgo.ApplicationCommand{
