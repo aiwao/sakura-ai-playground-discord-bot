@@ -68,38 +68,13 @@ func (s *SakuraSession) Chat(payload ChatPayload) (Message, error) {
 	return Message{}, errors.New("No messages was returned")
 }
 
-type AIModel int
-
-const(
-	GPT_OSS_120b AIModel = iota
-	Qwen3_Coder_30B_A3B_Instruct
-	Qwen3_Coder_480B_A35B_Instruct_FP8
-	LLM_JP_3_1_8x13b_instruct4
-	Phi_4_mini_instruct_cpu
-	Phi_4_multimodal_instruct
-	Qwen3_0_6B_cpu
-	Qwen3_VL_30B_A3B_Instruct
-)
-
-func (a AIModel) Name() string {
-	switch a {
-	case GPT_OSS_120b:
-		return "gpt-oss-120b"
-	case Qwen3_Coder_30B_A3B_Instruct:
-		return "Qwen3-Coder-30B-A3B-Instruct"
-	case Qwen3_Coder_480B_A35B_Instruct_FP8:
-		return "Qwen3-Coder-480B-A35B-Instruct-FP8"
-	case LLM_JP_3_1_8x13b_instruct4:
-		return "llm-jp-3.1-8x13b-instruct4"
-	case Phi_4_mini_instruct_cpu:
-		return "preview/Phi-4-mini-instruct-cpu"
-	case Phi_4_multimodal_instruct:
-		return "preview/Phi-4-multimodal-instruct"
-	case Qwen3_0_6B_cpu:
-		return "preview/Qwen3-0.6B-cpu"
-	case Qwen3_VL_30B_A3B_Instruct:
-		return "preview/Qwen3-VL-30B-A3B-Instruct"
-	default:
-		return ""
-	}
+var AIModelList = []string{
+	"gpt-oss-120b",
+	"Qwen3-Coder-30B-A3B-Instruct",
+	"Qwen3-Coder-480B-A35B-Instruct-FP8",
+	"llm-jp-3.1-8x13b-instruct4",
+	"preview/Phi-4-mini-instruct-cpu",
+	"preview/Phi-4-multimodal-instruct",
+	"preview/Qwen3-0.6B-cpu",
+	"preview/Qwen3-VL-30B-A3B-Instruct",
 }

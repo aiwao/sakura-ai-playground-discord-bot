@@ -11,6 +11,14 @@ import (
 )
 
 func AskCommand() *Command {
+	modelChoices := []*discordgo.ApplicationCommandOptionChoice{}
+	for _, m := range api.AIModelList {
+		modelChoices = append(modelChoices, &discordgo.ApplicationCommandOptionChoice{
+			Name: m,
+			Value: m,
+		})
+	}
+
 	return &Command{
 		Action: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			ephemeral, err := getOptionBool("ephemeral", mapOption(i))
@@ -39,12 +47,11 @@ func AskCommand() *Command {
 					return
 				}
 			
-				modelInt, err := getOptionInt("model", optionMap)
-				if err != nil || modelInt == -1 {
+				model, err := getOptionString("model", optionMap)
+				if err != nil || model == "" {
 					reply("Model is required", s, i)
 					return
 				}
-				model := api.AIModel(modelInt)	
 
 				id, err := getUserID(i)
 				if err != nil {
@@ -82,7 +89,7 @@ func AskCommand() *Command {
 
 				for idx := range min(20, len(sessionListCopy)) {
 					session := sessionListCopy[idx]
-					c, err := session.Chat(api.ChatPayload{Messages: messages, Model: model.Name()})
+					c, err := session.Chat(api.ChatPayload{Messages: messages, Model: model})
 					if err != nil {
 						log.Println(err)
 						continue
@@ -131,44 +138,11 @@ func AskCommand() *Command {
 					Required:    true,
 				},
 				{
-					Type: discordgo.ApplicationCommandOptionInteger,
+					Type: discordgo.ApplicationCommandOptionString,
 					Name: "model",
 					Description: "AI model to ask",
 					Required: true,
-					Choices: []*discordgo.ApplicationCommandOptionChoice{
-						{
-							Name:  api.GPT_OSS_120b.Name(),
-							Value: api.GPT_OSS_120b,
-						},
-						{
-							Name:  api.Qwen3_Coder_30B_A3B_Instruct.Name(),
-							Value: api.Qwen3_Coder_30B_A3B_Instruct,
-						},
-						{
-							Name:  api.Qwen3_Coder_480B_A35B_Instruct_FP8.Name(),
-							Value: api.Qwen3_Coder_480B_A35B_Instruct_FP8,
-						},
-						{
-							Name: api.LLM_JP_3_1_8x13b_instruct4.Name(), 
-							Value: api.LLM_JP_3_1_8x13b_instruct4,
-						},
-						{
-							Name:  api.Phi_4_mini_instruct_cpu.Name(),
-							Value: api.Phi_4_mini_instruct_cpu,
-						},
-						{
-							Name: api.Phi_4_multimodal_instruct.Name(),
-							Value: api.Phi_4_multimodal_instruct,
-						},
-						{
-							Name:  api.Qwen3_0_6B_cpu.Name(),
-							Value: api.Qwen3_0_6B_cpu,
-						},
-						{
-							Name:  api.Qwen3_VL_30B_A3B_Instruct.Name(),
-							Value: api.Qwen3_VL_30B_A3B_Instruct,
-						},
-					},
+					Choices: modelChoices,
 				},
 				{
 					Name: "ephemeral",
