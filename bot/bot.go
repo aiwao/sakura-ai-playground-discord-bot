@@ -106,9 +106,9 @@ func getUserID(i *discordgo.InteractionCreate) (string, error) {
 	return "", errors.New("failed to get user ID")
 }
 
-func thinkingFlag(s *discordgo.Session, i *discordgo.InteractionCreate, f int) {
+func thinkingFlag(s *discordgo.Session, i *discordgo.InteractionCreate, f discordgo.MessageFlags) {
 	data := &discordgo.InteractionResponseData{}
-	if f != -1 {
+	if f != discordgo.MessageFlags(-1) {
 		data.Flags = discordgo.MessageFlags(f)
 	}
 	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
@@ -118,11 +118,11 @@ func thinkingFlag(s *discordgo.Session, i *discordgo.InteractionCreate, f int) {
 }
 
 func thinking(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	thinkingFlag(s, i, -1)	
+	thinkingFlag(s, i, discordgo.MessageFlags(-1))
 }
 
 func thinkingEphemeral(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	thinkingFlag(s, i, int(discordgo.MessageFlagsEphemeral))
+	thinkingFlag(s, i, discordgo.MessageFlagsEphemeral)
 }
 
 func reply(message string, s *discordgo.Session, i *discordgo.InteractionCreate) {
