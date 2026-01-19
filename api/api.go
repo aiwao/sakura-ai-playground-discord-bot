@@ -3,7 +3,7 @@ package api
 import (
 	"encoding/json"
 	"net/http"
-	
+
 	"github.com/aiwao/rik"
 	"github.com/corpix/uarand"
 )
@@ -48,7 +48,7 @@ func (s *SakuraSession) Chat(payload ChatPayload) (Message, error) {
 	}
 	var localERR error = nil
 	var resPayload ResponsePayload
-
+	
 	b, _, err := rik.Post(chatURL).
 		JSON(payload).
 		Header("User-Agent", uarand.GetRandom()).
@@ -57,7 +57,6 @@ func (s *SakuraSession) Chat(payload ChatPayload) (Message, error) {
 		localERR = err
 		goto ON_ERROR	
 	}
-	
 	if err := json.Unmarshal(b, &resPayload); err != nil {
 		localERR = err
 		goto ON_ERROR

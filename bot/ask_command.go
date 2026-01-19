@@ -76,7 +76,9 @@ func AskCommand() *Command {
 				}
 				defer rows.Close()
 
-				messages := []api.Message{}
+				messageList := []api.Message{}
+				messageSize := 0
+				historyBig := false
 				for rows.Next() {
 					var message api.Message
 					if err := rows.Scan(&message.Content, &message.ID, &message.Role); err != nil {
@@ -84,16 +86,33 @@ func AskCommand() *Command {
 						reply("Internal server error", s, i)
 						return
 					}
-					messages = append(messages, message)
+					messageSize += len(message.Content)
+					if messageSize >= 14000 {
+						historyBig = true
+						break
+					}
+					messageList = append(messageList, message)
 				}
+
+				if historyBig {
+					_, err := environment.DB.Exec("DELETE FROM histories WHERE user_id = $1", id)
+					if err != nil {
+						log.Println(err)
+						reply("Internal server error", s, i)
+						return
+					}
+					messageList = []api.Message{}
+					reply("History was cleared because it was too big",s, i)
+				}
+
 				minID := 1000000000
 				maxID := 9999999999
 				msgID := rand.IntN(maxID-minID+1)+minID
 				userMSG := api.Message{ID: strconv.Itoa(msgID), Content: msg, Role: "user"}
-				messages = append(messages, userMSG)
+				messageList = append(messageList, userMSG)
 
 				for _, session := range sessionList {
-					c, err := session.Chat(api.ChatPayload{Messages: messages, Model: model})
+					c, err := session.Chat(api.ChatPayload{Messages: messageList, Model: model})
 					if session.InvalidRequestCount >= environment.MaxInvalid {
 						_, err := sessionmanager.Request(sessionmanager.RequestBody{
 							Method: sessionmanager.Deactivate,
