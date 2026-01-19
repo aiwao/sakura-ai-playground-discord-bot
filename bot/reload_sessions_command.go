@@ -3,6 +3,8 @@ package bot
 import (
 	"log"
 	"os"
+	"sakura_ai_bot/sessionmanager"
+	"sakura_ai_bot/utility"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -24,10 +26,15 @@ func ReloadSessionsCommand() *Command {
 					return
 				}
 
-				if cancelLoadSessions != nil {
-					cancelLoadSessions()
+				newIDList := utility.LoadSessionIDList()
+				_, err = sessionmanager.Request(sessionmanager.RequestBody{
+					Method: sessionmanager.Reload,
+					IDListReload: newIDList,
+				})
+				if err != nil {
+					reply("Internal server error", s, i)
+					return
 				}
-				loadSessions()
 
 				reply("Reloaded", s, i)
 			}()

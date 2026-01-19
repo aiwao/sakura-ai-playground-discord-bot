@@ -2,6 +2,7 @@ package bot
 
 import (
 	"log"
+	"sakura_ai_bot/environment"
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
@@ -28,7 +29,7 @@ func ShowHistoryCommand() *Command {
 					return
 				}
 
-				rows, err := botDB.Query(
+				rows, err := environment.DB.Query(
 					"SELECT content, role FROM histories WHERE user_id = $1 ORDER BY message_order ASC",
 					id,
 				)

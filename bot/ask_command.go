@@ -4,7 +4,8 @@ import (
 	"log"
 	"math/rand/v2"
 	"sakura_ai_bot/api"
-	"sakura_ai_bot/utility"
+	"sakura_ai_bot/environment"
+	"sakura_ai_bot/sessionmanager"
 	"strconv"
 
 	"github.com/bwmarrin/discordgo"
@@ -32,10 +33,14 @@ func AskCommand() *Command {
 				thinking(s, i)
 			}
 			go func() {
-				mu.Lock()
-				sessionListCopy := append([]*api.SakuraSession(nil), sessionList...)
-				mu.Unlock()
-				if len(sessionListCopy) == 0 {
+				res, err := sessionmanager.Request(sessionmanager.RequestBody{Method: sessionmanager.Get, AmountGet: environment.MaxSessions})
+				if err != nil {
+					log.Println(err)
+					reply("Internal server error", s, i)
+					return
+				}
+				sessionList := res.SessionGet
+				if len(sessionList) == 0 {
 					reply("Application is preparing now", s, i)
 					return
 				}
@@ -60,7 +65,7 @@ func AskCommand() *Command {
 					return
 				}
 
-				rows, err := botDB.Query(
+				rows, err := environment.DB.Query(
 					"SELECT content, id, role FROM histories WHERE user_id = $1 ORDER BY message_order ASC",
 					id,
 				)
@@ -87,13 +92,17 @@ func AskCommand() *Command {
 				userMSG := api.Message{ID: strconv.Itoa(msgID), Content: msg, Role: "user"}
 				messages = append(messages, userMSG)
 
-				for _, session := range sessionListCopy {
-					if session.InvalidRequestCount >= utility.MaxInvalid {
-						chAddSessions <- 1	
-						continue
-					}
-
+				for _, session := range sessionList {
 					c, err := session.Chat(api.ChatPayload{Messages: messages, Model: model})
+					if session.InvalidRequestCount >= environment.MaxInvalid {
+						_, err := sessionmanager.Request(sessionmanager.RequestBody{
+							Method: sessionmanager.Deactivate,
+							EmailDeactivate: session.ID.Email,
+						})
+						if err != nil {
+							log.Println(err)
+						}
+					}
 					if err != nil {
 						log.Println(err)
 						continue
@@ -102,7 +111,7 @@ func AskCommand() *Command {
 					replyBigString(c.Content, s, i)
 
 					dbQuery := "INSERT INTO histories(user_id, content, id, role) VALUES ($1, $2, $3, $4)"
-					_, err = botDB.Exec(
+					_, err = environment.DB.Exec(
 						dbQuery,
 						id,
 						userMSG.Content,
@@ -113,7 +122,7 @@ func AskCommand() *Command {
 						log.Println(err)
 						return
 					}
-					_, err = botDB.Exec(
+					_, err = environment.DB.Exec(
 						dbQuery,
 						id,
 						c.Content,

@@ -2,9 +2,8 @@ package api
 
 import (
 	"encoding/json"
-	"errors"
 	"net/http"
-		
+	
 	"github.com/aiwao/rik"
 	"github.com/corpix/uarand"
 )
@@ -47,28 +46,30 @@ func (s *SakuraSession) Chat(payload ChatPayload) (Message, error) {
 	client := &http.Client{
 		Jar: s.Jar,
 	}
+	var localERR error = nil
+	var resPayload ResponsePayload
 
 	b, _, err := rik.Post(chatURL).
 		JSON(payload).
 		Header("User-Agent", uarand.GetRandom()).
 		DoReadByteClient(client)
 	if err != nil {
-		s.InvalidRequestCount++
-		return Message{}, err
+		localERR = err
+		goto ON_ERROR	
 	}
-
-	var resPayload ResponsePayload
+	
 	if err := json.Unmarshal(b, &resPayload); err != nil {
-		s.InvalidRequestCount++
-		return Message{}, err
+		localERR = err
+		goto ON_ERROR
 	}
 
 	if len(resPayload.Content) > 0 {
 		return resPayload.Content[len(resPayload.Content)-1], nil
 	}
 
-	s.InvalidRequestCount++
-	return Message{}, errors.New("No messages was returned")
+	ON_ERROR:
+		s.InvalidRequestCount++
+		return Message{}, localERR
 }
 
 var AIModelList = []string{

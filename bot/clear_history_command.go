@@ -2,6 +2,7 @@ package bot
 
 import (
 	"log"
+	"sakura_ai_bot/environment"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -17,7 +18,7 @@ func ClearHistoryCommand() *Command {
 					reply("Internal server error", s, i)
 					return
 				}
-				_, err = botDB.Exec("DELETE FROM histories WHERE user_id = $1", id)
+				_, err = environment.DB.Exec("DELETE FROM histories WHERE user_id = $1", id)
 				if err != nil {
 					log.Println(err)
 					reply("Internal server error", s, i)
