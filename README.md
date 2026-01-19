@@ -1,6 +1,9 @@
 # Sakura AI Engine playground discord bot
 さくらのAIエンジンplaygroundを使った、Discordで動くaiチャットボット
 
+## 依存関係
+https://github.com/aiwao/sakura-id-gen
+
 ## 環境変数
 ```
 BOT_TOKEN: Discord BOTのトークン
